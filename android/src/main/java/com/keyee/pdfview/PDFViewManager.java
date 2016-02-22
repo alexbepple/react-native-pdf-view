@@ -58,6 +58,7 @@ public class PDFViewManager extends SimpleViewManager<PDFView> implements OnPage
     public void loadComplete(int nbPages) {
         WritableMap event = Arguments.createMap();
         event.putString("message", ""+nbPages);
+        event.putString("id", "" + pdfView.getId());
         ReactContext reactContext = (ReactContext)pdfView.getContext();
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
             pdfView.getId(),

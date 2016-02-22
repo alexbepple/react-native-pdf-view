@@ -11,7 +11,7 @@ class PDFView extends Component {
     }
 
     _onChange(event: Event) {
-        this.props.onLoadComplete && this.props.onLoadComplete(event.nativeEvent.value);
+        this.props.onLoadComplete && this.props.onLoadComplete({id: event.nativeEvent.id});
     }
 
     render() {
