@@ -127,6 +127,7 @@ public class PDFViewManager extends SimpleViewManager<PDFView>
         //view.setSource(src);
         fileName = src;
         display(false);
+        renderedThumbnail = false;
     }
 
     @ReactProp(name = "pageNumber")
