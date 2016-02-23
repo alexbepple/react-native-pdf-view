@@ -1,14 +1,19 @@
 package com.keyee.pdfview;
 
 import java.io.File;
+import java.io.ByteArrayOutputStream;
 
 import android.content.Context;
 import android.util.Log;
 import android.graphics.PointF;
+import android.graphics.Bitmap;
+import android.util.Base64;
+import android.graphics.Canvas;
 
 import com.joanzapata.pdfview.PDFView;
 import com.joanzapata.pdfview.listener.OnPageChangeListener;
 import com.joanzapata.pdfview.listener.OnLoadCompleteListener;
+import com.joanzapata.pdfview.listener.OnDrawListener;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -23,7 +28,9 @@ import com.facebook.react.common.MapBuilder;
 
 import static java.lang.String.format;
 
-public class PDFViewManager extends SimpleViewManager<PDFView> implements OnPageChangeListener,OnLoadCompleteListener {
+public class PDFViewManager extends SimpleViewManager<PDFView>
+    implements OnPageChangeListener, OnLoadCompleteListener, OnDrawListener {
+
     private static final String REACT_CLASS = "RCTPDFViewAndroid";
     private Context context;
     private PDFView pdfView;
@@ -58,13 +65,37 @@ public class PDFViewManager extends SimpleViewManager<PDFView> implements OnPage
     public void loadComplete(int nbPages) {
         WritableMap event = Arguments.createMap();
         event.putString("message", ""+nbPages);
-        event.putString("id", "" + pdfView.getId());
+
         ReactContext reactContext = (ReactContext)pdfView.getContext();
         reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
             pdfView.getId(),
             "topChange",
             event
          );
+    }
+
+    private boolean renderedThumbnail = false;
+
+    public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
+        if (!renderedThumbnail) {
+            Bitmap bitmap = pdfView.getThumbnail();
+            if (bitmap != null) {
+                WritableMap event = Arguments.createMap();
+                event.putString("message", "foobarbaz");
+
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+                renderedThumbnail = true;
+                event.putString("bytes", Base64.encodeToString(bytes.toByteArray(), Base64.DEFAULT));
+
+                ReactContext reactContext = (ReactContext)pdfView.getContext();
+                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+                    pdfView.getId(),
+                    "topLayout",
+                    event
+                );
+            }
+        }
     }
 
     private void display(boolean jumpToFirstPage) {
@@ -82,6 +113,7 @@ public class PDFViewManager extends SimpleViewManager<PDFView> implements OnPage
                 .swipeVertical(true)
                 .onPageChange(this)
                 .onLoad(this)
+                .onDraw(this)
                 .load();
         }
     }

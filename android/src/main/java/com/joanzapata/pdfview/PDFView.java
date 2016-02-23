@@ -328,6 +328,16 @@ public class PDFView extends SurfaceView {
         	moveTo(calculateCenterOffsetForPage(currentFilteredPage), currentYOffset);
     }
 
+    public int getNoOfThumbnails() {
+        return cacheManager.getThumbnails().size();
+    }
+
+    public Bitmap getThumbnail() {
+        if (getNoOfThumbnails() == 0) return null;
+        PagePart thumbnailPart = cacheManager.getThumbnails().get(0);
+        return thumbnailPart.getRenderedBitmap();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         // As I said in this class javadoc, we can think of this canvas as a huge
