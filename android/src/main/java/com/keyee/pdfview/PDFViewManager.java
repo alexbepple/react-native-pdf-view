@@ -76,26 +76,30 @@ public class PDFViewManager extends SimpleViewManager<PDFView>
 
     private boolean renderedThumbnail = false;
 
+    public void renderThumbnail() {
+        if (renderedThumbnail) return;
+        Bitmap bitmap = pdfView.getThumbnail();
+        if (bitmap == null) return;
+
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+        String thumbnail = Base64.encodeToString(bytes.toByteArray(), Base64.DEFAULT);
+
+        WritableMap event = Arguments.createMap();
+        event.putString("thumbnailJpegBase64", thumbnail);
+
+        ReactContext reactContext = (ReactContext)pdfView.getContext();
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+            pdfView.getId(),
+            "topLayout",
+            event
+        );
+
+        renderedThumbnail = true;
+    }
+
     public void onLayerDrawn(Canvas canvas, float pageWidth, float pageHeight, int displayedPage) {
-        if (!renderedThumbnail) {
-            Bitmap bitmap = pdfView.getThumbnail();
-            if (bitmap != null) {
-                WritableMap event = Arguments.createMap();
-                event.putString("message", "foobarbaz");
-
-                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
-                renderedThumbnail = true;
-                event.putString("bytes", Base64.encodeToString(bytes.toByteArray(), Base64.DEFAULT));
-
-                ReactContext reactContext = (ReactContext)pdfView.getContext();
-                reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-                    pdfView.getId(),
-                    "topLayout",
-                    event
-                );
-            }
-        }
+        renderThumbnail();
     }
 
     private void display(boolean jumpToFirstPage) {

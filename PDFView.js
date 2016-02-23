@@ -18,9 +18,12 @@ class PDFView extends Component {
     }
 
     _onLayout(event: Event) {
-      this.props.onLayout && this.props.onLayout({
-        message: event.nativeEvent.message,
-        bytes: event.nativeEvent.bytes
+      if (!this.props.onLayout) return
+      const thumbnailJpegBase64 = event.nativeEvent.thumbnailJpegBase64
+      if (!thumbnailJpegBase64) return
+
+      this.props.onLayout({
+        thumbnailJpegBase64
       });
     }
 
