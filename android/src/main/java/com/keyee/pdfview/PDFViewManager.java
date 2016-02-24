@@ -82,7 +82,7 @@ public class PDFViewManager extends SimpleViewManager<PDFView>
         if (bitmap == null) return;
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
         String thumbnail = Base64.encodeToString(bytes.toByteArray(), Base64.DEFAULT);
 
         WritableMap event = Arguments.createMap();
